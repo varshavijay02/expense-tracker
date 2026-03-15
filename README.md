@@ -1,5 +1,12 @@
 # Expense Tracker (Offline Desktop App)
 
+⚠️ Project Status: Work in Progress
+
+This project is currently under active development.
+Features may change, some components may be incomplete, and the architecture may evolve as the system matures.
+
+
+
 A desktop expense tracker that automatically imports bank statements, extracts transactions, categorizes them using a **TF-IDF + Logistic Regression classifier**, and displays spending insights.
 
 The application runs fully offline using **Electron, React, SQLite, and Python ML models**.
