@@ -6,3 +6,10 @@ build/
 database.sqlite
 model/
 prompts_need_to_use_in_future.md
+database/sqlite.db
+database/transactions.csv
+gmail_token
+# database files
+database/*.db
+database/*.csv
+
