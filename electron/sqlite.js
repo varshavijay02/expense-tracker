@@ -2,10 +2,11 @@ const path = require('path');
 const Database = require('better-sqlite3');
 
 let db;
+let dbPathCached;
 
 function initDatabase(userDataPath) {
-  const dbPath = path.join(userDataPath || __dirname, 'finance.db');
-  db = new Database(dbPath);
+  dbPathCached = path.join(userDataPath || __dirname, 'finance.db');
+  db = new Database(dbPathCached);
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS categories (
@@ -30,7 +31,34 @@ function initDatabase(userDataPath) {
     );
   `);
 
+  // Migration: add source_email_id for dedupe
+  migrateTransactionsForEmailDedupe();
+
   seedInitialData();
+}
+
+function migrateTransactionsForEmailDedupe() {
+  const cols = db.prepare('PRAGMA table_info(transactions)').all();
+  const hasSource = cols.some((c) => c.name === 'source_email_id');
+  if (!hasSource) {
+    db.exec('ALTER TABLE transactions ADD COLUMN source_email_id TEXT;');
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_source_email_id ON transactions(source_email_id);');
+}
+
+function getSetting(key) {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+}
+
+function setSetting(key, value) {
+  const upsert = db.prepare(`
+    INSERT INTO settings (key, value)
+    VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `);
+  upsert.run(key, value);
+  return { success: true };
 }
 
 function seedInitialData() {
@@ -183,18 +211,11 @@ function getCategoriesWithTotals() {
 }
 
 function getSettingsEmail() {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get('email');
-  return row ? row.value : null;
+  return getSetting('email');
 }
 
 function setSettingsEmail(email) {
-  const upsert = db.prepare(`
-    INSERT INTO settings (key, value)
-    VALUES ('email', ?)
-    ON CONFLICT(key) DO UPDATE SET value = excluded.value
-  `);
-  upsert.run(email);
-  return { success: true };
+  return setSetting('email', email);
 }
 
 module.exports = {
@@ -204,6 +225,8 @@ module.exports = {
   updateTransaction,
   getCategoriesWithTotals,
   getSettingsEmail,
-  setSettingsEmail
+  setSettingsEmail,
+  getSetting,
+  setSetting
 };
 

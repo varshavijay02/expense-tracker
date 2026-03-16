@@ -3,10 +3,10 @@ import React from 'react';
 function Settings({ email, onEmailChange }) {
   const [input, setInput] = React.useState(email || '');
 
-  const handleRefresh = () => {
-    // Placeholder: offline app, so this is a no-op in demo
-    // In a real integration, you would trigger statement syncing here.
-    // Keeping function to satisfy UI requirement.
+  const handleRefresh = async () => {
+    if (window.api?.fetchNewTransactions) {
+      await window.api.fetchNewTransactions();
+    }
   };
 
   const handleExport = () => {

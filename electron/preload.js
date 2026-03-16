@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   updateTransaction: (payload) => ipcRenderer.invoke('transactions:update', payload),
   getCategoriesWithTotals: () => ipcRenderer.invoke('categories:getWithTotals'),
   getEmail: () => ipcRenderer.invoke('settings:getEmail'),
-  setEmail: (email) => ipcRenderer.invoke('settings:setEmail', email)
+  setEmail: (email) => ipcRenderer.invoke('settings:setEmail', email),
+  fetchNewTransactions: () => ipcRenderer.invoke('gmail:fetchNewTransactions')
 });
 

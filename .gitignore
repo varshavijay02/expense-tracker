@@ -5,4 +5,4 @@ build/
 *.log
 database.sqlite
 model/
-prompts.md
+prompts_need_to_use_in_future.md
